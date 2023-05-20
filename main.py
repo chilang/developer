@@ -4,26 +4,18 @@ import os
 import ast
 import argparse
 import dotenv
-import vcr
+from record import my_vcr
 
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+)  # for exponential backoff
+ 
 # load environment variables from .env file
 dotenv.load_dotenv()
 
-def ignore_failed_response():
-    # do not record response with status code 429 (too many requests) and 502 (bad gateway)
-    def before_record_response(response):
-        if response['status']['code'] in [429, 502]:
-            return None
-        return response
-    return before_record_response
 
-my_vcr = vcr.VCR(
-    serializer='yaml',
-    cassette_library_dir='recordings',
-    record_mode='new_episodes',
-    match_on=['uri', 'method', 'body'],
-    before_record_response=ignore_failed_response(),
-)
 
 # stub = modal.Stub("smol-developer-v1")
 generatedDir = "generated"
@@ -44,6 +36,7 @@ openai_model_max_tokens = 2000 # i wonder how to tweak this properly
 #     # timeout=120,
 # )
 @my_vcr.use_cassette('chat.yaml')
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(3))
 def generate_response(system_prompt, user_prompt, *args):
     import openai
     import tiktoken

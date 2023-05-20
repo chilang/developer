@@ -1,16 +1,10 @@
 # import modal
 import os
-import vcr
 import dotenv
+from record import my_vcr
 
 dotenv.load_dotenv()
 
-my_vcr = vcr.VCR(
-    serializer='yaml',
-    cassette_library_dir='recordings',
-    record_mode='new_episodes',
-    match_on=['uri', 'method', 'body'],
-)
 
 # stub = modal.Stub("smol-debugger-v1")
 generatedDir = "generated"
