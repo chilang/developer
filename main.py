@@ -1,26 +1,32 @@
 import sys
 import os
-import modal
+# import modal
 import ast
+import argparse
+import dotenv
 
-stub = modal.Stub("smol-developer-v1")
+# load environment variables from .env file
+dotenv.load_dotenv()
+
+
+# stub = modal.Stub("smol-developer-v1")
 generatedDir = "generated"
-openai_image = modal.Image.debian_slim().pip_install("openai", "tiktoken")
+# openai_image = modal.Image.debian_slim().pip_install("openai", "tiktoken")
 openai_model = "gpt-4" # or 'gpt-3.5-turbo',
 openai_model_max_tokens = 2000 # i wonder how to tweak this properly
 
 
-@stub.function(
-    image=openai_image,
-    secret=modal.Secret.from_dotenv(),
-    retries=modal.Retries(
-        max_retries=3,
-        backoff_coefficient=2.0,
-        initial_delay=1.0,
-    ),
-    # concurrency_limit=5,
-    # timeout=120,
-)
+# @stub.function(
+#     image=openai_image,
+#     secret=modal.Secret.from_dotenv(),
+#     retries=modal.Retries(
+#         max_retries=3,
+#         backoff_coefficient=2.0,
+#         initial_delay=1.0,
+#     ),
+#     # concurrency_limit=5,
+#     # timeout=120,
+# )
 def generate_response(system_prompt, user_prompt, *args):
     import openai
     import tiktoken
@@ -61,10 +67,10 @@ def generate_response(system_prompt, user_prompt, *args):
     return reply
 
 
-@stub.function()
+# @stub.function()
 def generate_file(filename, filepaths_string=None, shared_dependencies=None, prompt=None):
     # call openai api with this prompt
-    filecode = generate_response.call(
+    filecode = generate_response(
         f"""You are an AI developer who is trying to write a program that will generate code for the user based on their intent.
         
     the app is: {prompt}
@@ -102,7 +108,7 @@ def generate_file(filename, filepaths_string=None, shared_dependencies=None, pro
     return filename, filecode
 
 
-@stub.local_entrypoint()
+# @stub.local_entrypoint()
 def main(prompt, directory=generatedDir, file=None):
     # read file from prompt if it ends in a .md filetype
     if prompt.endswith(".md"):
@@ -118,7 +124,7 @@ def main(prompt, directory=generatedDir, file=None):
     # a prompt for reading the currently open page and generating some response from openai
 
     # call openai api with this prompt
-    filepaths_string = generate_response.call(
+    filepaths_string = generate_response(
         """You are an AI developer who is trying to write a program that will generate code for the user based on their intent.
         
     When given their intent, create a complete, exhaustive list of filepaths that the user would write to make the program.
@@ -149,7 +155,7 @@ def main(prompt, directory=generatedDir, file=None):
             clean_dir(directory)
 
             # understand shared dependencies
-            shared_dependencies = generate_response.call(
+            shared_dependencies = generate_response(
                 """You are an AI developer who is trying to write a program that will generate code for the user based on their intent.
                 
             In response to the user's prompt:
@@ -170,10 +176,13 @@ def main(prompt, directory=generatedDir, file=None):
             # write shared dependencies as a md file inside the generated directory
             write_file("shared_dependencies.md", shared_dependencies, directory)
             
+            
             # Existing for loop
-            for filename, filecode in generate_file.map(
-                list_actual, order_outputs=False, kwargs=dict(filepaths_string=filepaths_string, shared_dependencies=shared_dependencies, prompt=prompt)
-            ):
+            # for filename, filecode in generate_file.map(
+            #    list_actual, order_outputs=False, kwargs=dict(filepaths_string=filepaths_string, shared_dependencies=shared_dependencies, prompt=prompt)
+            # ):
+            for fname in list_actual:
+                filename, filecode = generate_file(fname, filepaths_string=filepaths_string, shared_dependencies=shared_dependencies, prompt=prompt)
                 write_file(filename, filecode, directory)
 
 
@@ -211,3 +220,13 @@ def clean_dir(directory):
                     os.remove(os.path.join(root, file))
     else:
         os.makedirs(directory, exist_ok=True)
+
+
+if __name__ == "__main__":
+    # parse the arguments --prompt and --file
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--prompt", help="the prompt to generate code from")
+    parser.add_argument("--file", help="the file to generate code for")
+    args = parser.parse_args()
+
+    main(args.prompt, file=args.file)
