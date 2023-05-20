@@ -4,10 +4,17 @@ import os
 import ast
 import argparse
 import dotenv
+import vcr
 
 # load environment variables from .env file
 dotenv.load_dotenv()
 
+my_vcr = vcr.VCR(
+    serializer='yaml',
+    cassette_library_dir='recordings',
+    record_mode='new_episodes',
+    match_on=['uri', 'method', 'body'],
+)
 
 # stub = modal.Stub("smol-developer-v1")
 generatedDir = "generated"
@@ -27,6 +34,7 @@ openai_model_max_tokens = 2000 # i wonder how to tweak this properly
 #     # concurrency_limit=5,
 #     # timeout=120,
 # )
+@my_vcr.use_cassette('chat.yaml')
 def generate_response(system_prompt, user_prompt, *args):
     import openai
     import tiktoken
