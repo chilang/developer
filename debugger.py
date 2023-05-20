@@ -1,9 +1,20 @@
-import modal
+# import modal
 import os
+import vcr
+import dotenv
 
-stub = modal.Stub("smol-debugger-v1")
+dotenv.load_dotenv()
+
+my_vcr = vcr.VCR(
+    serializer='yaml',
+    cassette_library_dir='recordings',
+    record_mode='new_episodes',
+    match_on=['uri', 'method', 'body'],
+)
+
+# stub = modal.Stub("smol-debugger-v1")
 generatedDir = "generated"
-openai_image = modal.Image.debian_slim().pip_install("openai")
+# openai_image = modal.Image.debian_slim().pip_install("openai")
 
 
 
@@ -26,7 +37,7 @@ def walk_directory(directory):
 
 
 
-@stub.local_entrypoint()
+# @stub.local_entrypoint()
 def main(prompt, directory=generatedDir, model="gpt-3.5-turbo"):
   code_contents = walk_directory(directory)
 
@@ -37,22 +48,23 @@ def main(prompt, directory=generatedDir, model="gpt-3.5-turbo"):
   system = "You are an AI debugger who is trying to debug a program for a user based on their file system. The user has provided you with the following files and their contents, finally folllowed by the error message or issue they are facing."
   prompt = "My files are as follows: " + context + "\n\n" + "My issue is as follows: " + prompt
   prompt += "\n\nGive me ideas for what could be wrong and what fixes to do in which files."
-  res = generate_response.call(system, prompt, model)
+  res = generate_response(system, prompt, model)
   # print res in teal
   print("\033[96m" + res + "\033[0m")
 
 
-@stub.function(
-    image=openai_image,
-    secret=modal.Secret.from_dotenv(),
-    retries=modal.Retries(
-        max_retries=3,
-        backoff_coefficient=2.0,
-        initial_delay=1.0,
-    ),
-    concurrency_limit=5,
-    timeout=120,
-)
+# @stub.function(
+#     image=openai_image,
+#     secret=modal.Secret.from_dotenv(),
+#     retries=modal.Retries(
+#         max_retries=3,
+#         backoff_coefficient=2.0,
+#         initial_delay=1.0,
+#     ),
+#     concurrency_limit=5,
+#     timeout=120,
+# )
+@my_vcr.use_cassette("debugger.yaml")
 def generate_response(system_prompt, user_prompt, model="gpt-3.5-turbo", *args):
     import openai
 
@@ -82,3 +94,18 @@ def generate_response(system_prompt, user_prompt, model="gpt-3.5-turbo", *args):
     # Get the reply from the API response
     reply = response.choices[0]["message"]["content"]
     return reply
+
+
+if __name__ == "__main__":
+    # parse the command line arguments like --prompt and --model
+    import argparse
+
+    parser = argparse.ArgumentParser(description="OpenAI Debugger")
+    parser.add_argument("--prompt", type=str, help="The prompt to use")
+    parser.add_argument("--model", type=str, help="The model to use")
+
+    args = parser.parse_args()
+    prompt = args.prompt
+    model = args.model
+
+    main(prompt, model=model)
