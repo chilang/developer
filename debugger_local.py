@@ -1,9 +1,14 @@
 # import modal
 import os
-from constants import DEFAULT_DIR, DEFAULT_MODEL, DEFAULT_MAX_TOKENS, EXTENSION_TO_SKIP
+import dotenv
+from record import my_vcr
 
-stub = modal.Stub("smol-debugger-v1")
-openai_image = modal.Image.debian_slim().pip_install("openai")
+dotenv.load_dotenv()
+
+
+# stub = modal.Stub("smol-debugger-v1")
+generatedDir = "generated"
+# openai_image = modal.Image.debian_slim().pip_install("openai")
 
 
 
@@ -25,8 +30,8 @@ def walk_directory(directory):
 
 
 
-@stub.local_entrypoint()
-def main(prompt, directory=DEFAULT_DIR, model="gpt-3.5-turbo"):
+# @stub.local_entrypoint()
+def main(prompt, directory=generatedDir, model="gpt-3.5-turbo"):
   code_contents = walk_directory(directory)
 
   # Now, `code_contents` is a dictionary that contains the content of all your non-image files

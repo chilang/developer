@@ -1,5 +1,12 @@
 # smol developer
 
+<a href="https://app.e2b.dev/agent/smol-developer" target="_blank" rel="noopener noreferrer">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://app.e2b.dev/api/badge_light">
+  <img alt="Deploy agent on e2b button" src="https://app.e2b.dev/api/badge"/>
+</picture>
+</a>
+
 ***Human-centric & Coherent Whole Program Synthesis*** aka your own personal junior developer
 
 > [Build the thing that builds the thing!](https://twitter.com/swyx/status/1657578738345979905) a `smol dev` for every dev in every situation
@@ -35,7 +42,7 @@ Perhaps a higher order evolution of programming where you still need to be techn
 
 - [6 minute video demo](https://youtu.be/UCo7YeTy-aE) - (sorry for sped up audio, we were optimizing for twitter, bad call)
   - this was the original smol developer demo - going from prompt to full chrome extension that requests and stores and apikey, generates a popup window, reads and transmits page content, and usefully summarizes any website with Anthropic Claude, switching models up to the 100k one based on length of input
-  - the prompt is located in [prompt.md](https://github.com/smol-ai/developer/blob/main/prompt.md) and it outputs [/exampleChromeExtension](https://github.com/smol-ai/developer/tree/main/exampleChromeExtension)
+  - the prompt is located in [prompt.md](https://github.com/smol-ai/developer/blob/main/prompt.md) and it outputs [/exampleChromeExtension](https://github.com/smol-ai/developer/tree/main/examples/exampleChromeExtension)
 - `smol-plugin` - prompt to ChatGPT plugin ([tweet](https://twitter.com/ultrasoundchad/status/1659366507409985536?s=20), [fork](https://github.com/gmchad/smol-plugin))
 
   <img src="https://github.com/smol-ai/developer/assets/6764957/6ffaac3b-5d90-460a-a590-c8a8c004bd36" height=200 />
@@ -45,16 +52,26 @@ Perhaps a higher order evolution of programming where you still need to be techn
   <img src="https://github.com/smol-ai/developer/assets/6764957/15fa189a-3f52-4618-ac8e-2a77b6500264" height=200 />
   
 - [Political Campaign CRM Program example](https://github.com/smol-ai/developer/pull/22/files)
+- [Lessons from Creating a VSCode Extension with GPT-4](https://bit.kevinslin.com/p/leveraging-gpt-4-to-automate-the) (also on [HN](https://news.ycombinator.com/item?id=36071342))
+- [7 min Video: Smol AI Developer - Build ENTIRE Codebases With A Single Prompt](https://www.youtube.com/watch?v=DzRoYc2UGKI) produces a full working OpenAI CLI python app from a prompt
+
+  <img src="https://github.com/smol-ai/developer/assets/6764957/e80058f1-ea9c-42dd-87ff-004b61f08f2e" height=200 />
+  
+- [12 min Video: SMOL AI - Develop Large Scale Apps with AGI in one click](https://www.youtube.com/watch?v=zsxyqz6SYp8) scaffolds a surprisingly complex React/Node/MongoDB full stack app in 40 minutes and $9
+
+  <img src="https://github.com/smol-ai/developer/assets/6764957/c51f9f8c-021d-446a-b44d-7a6f48e64550" height=200 />
 
 I'm actively seeking more examples, please PR yours! 
 
 sorry for the lack of examples, I know that is frustrating but I wasnt ready for so many of you lol
 
-## major forks
+## major forks/alternatives
 
 please send in alternative implementations, and deploy strategies on alternative stacks!
 
-- https://github.com/PicoCreator/smol-dev-js A pure JS variant of smol-dev, allowing even smoler incremental changes via prompting (if you dun want to do the whole spec2code thing), allowing you to plug it into any project live (for better or worse)
+- **JS/TS**: https://github.com/PicoCreator/smol-dev-js A pure JS variant of smol-dev, allowing even smoler incremental changes via prompting (if you dun want to do the whole spec2code thing), allowing you to plug it into any project live (for better or worse)
+- **C#/Dotnet**: https://github.com/colhountech/smol-ai-dotnet in C#!
+- **Golang**: https://github.com/tmc/smol-dev-go in Go
 - https://github.com/gmchad/smol-plugin automatically generate @openai plugins by specifying your API in markdown in smol-developer style
 - your fork here!
 
@@ -107,49 +124,52 @@ it's basically:
 
 There are no python dependencies to wrangle thanks to using Modal as a [self-provisioning runtime](https://www.google.com/search?q=self+provisioning+runtime).
 
-Unfortunately this project also uses 3 waitlisted things:
+Unfortunately this project also uses 3 other things:
 
-- Modal.com - `pip install modal-client` (private beta - hit up the modal team to get an invite, and login)
+- Modal.com - [sign up](https://modal.com/signup), then `pip install modal-client && modal token new`
   - You can run this project w/o Modal following these instructions:
   - `pip install -r requirements.txt`
+  - `export OPENAI_API_KEY=sk-xxxxxx` (your openai api key here)
   - `python main_no_modal.py YOUR_PROMPT_HERE`
-- GPT-4 api (private beta) - can use 3.5 but obviously wont be as good
-- (for the demo project) anthropic claude 100k context api (private beta)
-
-> yes, the most important skill in being an ai engineer is social engineering to get off waitlists. Modal will let you in if you say the keyword "swyx"
+- GPT-4 api (private beta) - this project now defaults to using `gpt-3.5-turbo` but it obviously wont be as good. we are working on a hosted version so you can try this out on our keys.
+- (for the demo project only) anthropic claude 100k context api (private beta) - not important unless you're exactly trying to repro my demo
 
 you'll have to adapt this code on a fork if you want to use it on other infra. please open issues/PRs and i'll happily highlight your fork here.
 
-### trying the example chrome extension
+### trying the example chrome extension from the demo video
 
-the `/generated` and `/exampleChromeExtension` folder contains `a Chrome Manifest V3 extension that reads the current page, and offers a popup UI that has the page title+content and a textarea for a prompt (with a default value we specify). When the user hits submit, it sends the page title+content to the Anthropic Claude API along with the up to date prompt to summarize it. The user can modify that prompt and re-send the prompt+content to get another summary view of the content.`
+the `/examples/exampleChromeExtension` folder contains `a Chrome Manifest V3 extension that reads the current page, and offers a popup UI that has the page title+content and a textarea for a prompt (with a default value we specify). When the user hits submit, it sends the page title+content to the Anthropic Claude API along with the up to date prompt to summarize it. The user can modify that prompt and re-send the prompt+content to get another summary view of the content.`
 
 - go to Manage Extensions in Chrome
 - load unpacked
 - find the relevant folder in your file system and load it
 - go to any content heavy site
 - click the cute bird
-- see it work
+- see it work and rejoice
 
 this entire extension was generated by the prompt in `prompt.md` (except for the images), and was built up over time by adding more words to the prompt in an iterative process.
 
-## smol dev
+## usage: smol dev
 
-basic usage
+basic usage (by default it runs with `gpt-3.5-turbo`, but we strongly encourage running with `gpt-4` if you have access)
 
 ```bash
-modal run main.py --prompt "a Chrome extension that, when clicked, opens a small window with a page where you can enter a prompt for reading the currently open page and generating some response from openai"   
+# inline prompt
+modal run main.py --prompt "a Chrome extension that, when clicked, opens a small window with a page where you can enter a prompt for reading the currently open page and generating some response from openai" --model=gpt-4
 ```
 
 after a while of adding to your prompt, you can extract your prompt to a file, as long as your "prompt" ends in a .md extension we'll go look for that file
 
 ```bash
-modal run main.py --prompt prompt.md   
+# prompt in markdown file
+modal run main.py --prompt prompt.md --model=gpt-4
 ```
 
 each time you run this, the generated directory is deleted (except for images) and all files are rewritten from scratch. 
 
-In the `shared_dependencies.md` file is a helper file that ensures coherence between files.
+In the `shared_dependencies.md` file is a helper file that ensures coherence between files. This is in the process of being expanded into an official `--plan` functionality (see https://github.com/smol-ai/developer/issues/12)
+
+### smol dev in single file mode
 
 if you make a tweak to the prompt and only want it to affect one file, and keep the rest of the files, specify the file param:
 
@@ -157,7 +177,24 @@ if you make a tweak to the prompt and only want it to affect one file, and keep 
 modal run main.py --prompt prompt.md  --file popup.js
 ```
 
-## smol debugger
+### smol dev without modal.com
+
+By default, `main.py` uses Modal, beacuse it provides a nice upgrade path to a hosted experience (coming soon, so you can try it out without needing GPT4 key access).
+
+However if you want to just run it on your own machine, you can run smol dev w/o Modal following these instructions:
+
+```bash
+pip install -r requirements.txt
+export OPENAI_API_KEY=sk-xxxxxx # your openai api key here)
+
+python main_no_modal.py YOUR_PROMPT_HERE
+```
+
+If no command line argument is given, **and** the file `prompt.md` exists, the main function will automatically use the `prompt.md` file. All other command line arguments are left as default. *this is handy for those using the "run" function on a `venv` setup in PyCharm for Windows, where no opportunity is given to enter command line arguments. Thanks [@danmenzies](https://github.com/smol-ai/developer/pull/55)* 
+
+## usage: smol debugger
+
+*this is a beta feature, very very MVP, just a proof of concept really*
 
 take the entire contents of the generated directory in context, feed in an error, get a response. this basically takes advantage of longer (32k-100k) context so we basically dont have to do any embedding of the source.
 
@@ -168,18 +205,20 @@ modal run debugger.py --prompt "Uncaught (in promise) TypeError: Cannot destruct
 modal run debugger.py --prompt "your_error msg_here" --model=gpt-4
 ```
 
-## smol pm
+## usage: smol pm
+
+*this is even worse than beta, its kind of a "let's see what happens" experiment*
 
 take the entire contents of the generated directory in context, and get a prompt back that could synthesize the whole program. basically `smol dev`, in reverse.
 
 ```bash
-modal run code2prompt.py # ~0.5 second
+modal run code2prompt.py # ~0.5 second with gpt 3.5
 
 # use gpt4
 modal run code2prompt.py --model=gpt-4 # 2 mins, MUCH better results
 ```
 
-We have done indicative runs of both, stored in `code2prompt-gpt3.md` vs `code2prompt-gpt4.md`. Note how incredibly better gpt4 is at prompt engineering its future self.
+We have done indicative runs of both, stored in `examples/code2prompt/code2prompt-gpt3.md` vs `examples/code2prompt/code2prompt-gpt4.md`. Note how incredibly better gpt4 is at prompt engineering its future self.
 
 Naturally, we had to try `code2prompt2code`...
 
@@ -192,6 +231,37 @@ modal run main.py --prompt code2prompt-gpt4.md --directory code2prompt2code
 ```
 
 We leave the social and technical impacts of multilayer generative deep-frying of codebases as an exercise to the reader.
+
+## Development using a Dev Container
+
+> this is a [new addition](https://github.com/smol-ai/developer/pull/30)! Please try it out and send in fixes if there are any issues.
+
+We have configured a development container for this project, which provides an isolated and consistent development environment. This approach is ideal for developers using Visual Studio Code's Remote - Containers extension or GitHub's Codespaces.
+
+If you have [VS Code](https://code.visualstudio.com/download) and [Docker](https://www.swyx.io/running-docker-without-docker-desktop) installed on your machine, you can make use of the devcontainer to create an isolated environment with all dependencies automatically installed and configured. This is a great way to ensure a consistent development experience across different machines.
+
+Here are the steps to use the devcontainer:
+
+1. Open this project in VS Code.
+2. When prompted to "Reopen in Container", choose "Reopen in Container". This will start the process of building the devcontainer defined by the `Dockerfile` and `.devcontainer.json` in the `.devcontainer` directory.
+3. Wait for the build to finish. The first time will be a bit longer as it downloads and builds everything. Future loads will be much faster.
+4. Once the build is finished, the VS Code window will reload and you are now working inside the devcontainer.
+
+
+<details>
+<summary> Benefits of a Dev Container </summary>
+
+1. **Consistent Environment**: Every developer works within the same development setup, eliminating "it works on my machine" issues and easing the onboarding of new contributors.
+
+2. **Sandboxing**: Your development environment is isolated from your local machine, allowing you to work on multiple projects with differing dependencies without conflict.
+
+3. **Version Control for Environments**: Just as you version control your source code, you can do the same with your development environment. If a dependency update introduces issues, it's easy to revert to a previous state.
+
+4. **Easier CI/CD Integration**: If your CI/CD pipeline utilizes Docker, your testing environment will be identical to your local development environment, ensuring consistency across development, testing, and production setups.
+
+5. **Portability**: This setup can be utilized on any computer with Docker and the appropriate IDE installed. Simply clone the repository and start the container.
+</details>
+
 
 ## future directions
 
